@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EmpTrack - Employee Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: '#4F46E5',
+                            dark: '#4338CA'
+                        },
+                        secondary: {
+                            DEFAULT: '#10B981',
+                            dark: '#059669'
+                        },
+                        dark: {
+                            DEFAULT: '#1E1E2D',
+                            light: '#2A2A3C'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-100 dark:bg-dark">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <div class="sidebar bg-white dark:bg-gray-800 shadow-lg flex flex-col h-full fixed z-20 w-64" id="sidebar">
+            <div class="p-4 flex items-center justify-between border-b border-gray-200 dark:border-gray-700">
+                <div class="flex items-center">
+                    <!-- Logo placeholder with icon -->
+                    <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+                        <i class="fas fa-users text-white text-sm"></i>
+                    </div>
+                    <span class="nav-text ml-3 text-xl font-bold text-gray-800 dark:text-white">EmpTrack</span>
+                </div>
+                <button id="toggleSidebar" class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 lg:hidden">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto">
+                <nav class="p-2">
+                    <div class="mb-4">
+                        <p class="nav-text text-xs uppercase text-gray-500 dark:text-gray-400 py-2 px-4">Main</p>
+                        <a href="#dashboard" class="nav-link flex items-center p-3 rounded-lg text-primary bg-primary/10 dark:text-white dark:bg-white/10 mb-1" data-section="dashboard">
+                            <i class="fas fa-chart-pie"></i>
+                            <span class="nav-text ml-3">Dashboard</span>
+                        </a>
+                        <a href="#employees" class="nav-link flex items-center p-3 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 mb-1" data-section="employees">
+                            <i class="fas fa-users"></i>
+                            <span class="nav-text ml-3">Employees</span>
+                        </a>
+                        <a href="#departments" class="nav-link flex items-center p-3 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 mb-1" data-section="departments">
+                            <i class="fas fa-building"></i>
+                            <span class="nav-text ml-3">Departments</span>
+                        </a>
+                        <a href="#attendance" class="nav-link flex items-center p-3 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 mb-1" data-section="attendance">
+                            <i class="fas fa-calendar-check"></i>
+                            <span class="nav-text ml-3">Attendance</span>
+                        </a>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <p class="nav-text text-xs uppercase text-gray-500 dark:text-gray-400 py-2 px-4">Administration</p>
+                        <a href="#finances" class="nav-link flex items-center p-3 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 mb-1" data-section="finances">
+                            <i class="fas fa-dollar-sign"></i>
+                            <span class="nav-text ml-3">Finances</span>
+                        </a>
+                        <a href="#birthdays" class="nav-link flex items-center p-3 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 mb-1" data-section="birthdays">
+                            <i class="fas fa-birthday-cake"></i>
+                            <span class="nav-text ml-3">Birthdays</span>
+                        </a>
+                        <a href="#meetings" class="nav-link flex items-center p-3 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 mb-1" data-section="meetings">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span class="nav-text ml-3">Meetings</span>
+                        </a>
+                        <a href="#files" class="nav-link flex items-center p-3 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 mb-1" data-section="files">
+                            <i class="fas fa-folder"></i>
+                            <span class="nav-text ml-3">Files</span>
+                        </a>
+                        <a href="#reports" class="nav-link flex items-center p-3 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 mb-1" data-section="reports">
+                            <i class="fas fa-file-alt"></i>
+                            <span class="nav-text ml-3">Reports</span>
+                        </a>
+                        <a href="#settings" class="nav-link flex items-center p-3 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 mb-1" data-section="settings">
+                            <i class="fas fa-cog"></i>
+                            <span class="nav-text ml-3">Settings</span>
+                        </a>
+                    </div>
+                </nav>
+            </div>
+            
+            <div class="p-4 border-t border-gray-200 dark:border-gray-700">
+                <div class="flex items-center">
+                    <!-- User avatar placeholder -->
+                    <div class="w-10 h-10 bg-gray-300 dark:bg-gray-600 rounded-full flex items-center justify-center">
+                        <i class="fas fa-user text-gray-600 dark:text-gray-300"></i>
+                    </div>
+                    <div class="nav-text ml-3">
+                        <p class="text-sm font-medium text-gray-800 dark:text-white">Admin User</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Super Admin</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile overlay -->
+        <div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-10 hidden lg:hidden"></div>
+        
+        <!-- Main Content -->
+        <div class="content flex-1 flex flex-col overflow-auto ml-0 lg:ml-64 transition-all duration-300" id="mainContent">
+            <!-- Header -->
+            <header class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+                <div class="flex justify-between items-center p-4">
+                    <div class="flex items-center">
+                        <button id="mobileMenuToggle" class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 lg:hidden mr-4">
+                            <i class="fas fa-bars"></i>
+                        </button>
+                        <h1 class="text-xl lg:text-2xl font-bold text-gray-800 dark:text-white" id="pageTitle">Dashboard</h1>
+                    </div>
+                    <div class="flex items-center space-x-2 lg:space-x-4">
+                        <div class="relative hidden sm:block">
+                            <input type="text" placeholder="Search..." class="pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent w-48 lg:w-64">
+                            <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                        </div>
+                        <button id="darkModeToggle" class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                            <i class="fas fa-moon dark:hidden"></i>
+                            <i class="fas fa-sun hidden dark:block"></i>
+                        </button>
+                        <div class="relative">
+                            <button class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors relative">
+                                <i class="fas fa-bell"></i>
+                                <span class="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-red-500"></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            
+            <main class="flex-1 p-4 lg:p-6 overflow-auto">
+                <!-- Dashboard Section -->
+                <div id="dashboard-section" class="section active">
+                    <!-- Stats Cards -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6">
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 lg:p-6 border border-gray-200 dark:border-gray-700">
+                            <div class="flex items-center">
+                                <div class="p-3 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300">
+                                    <i class="fas fa-users text-lg lg:text-xl"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Employees</p>
+                                    <h3 class="text-xl lg:text-2xl font-bold text-gray-800 dark:text-white">247</h3>
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <div class="flex items-center text-sm text-green-500 dark:text-green-400">
+                                    <i class="fas fa-arrow-up mr-1"></i>
+                                    <span>12% from last month</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 lg:p-6 border border-gray-200 dark:border-gray-700">
+                            <div class="flex items-center">
+                                <div class="p-3 rounded-full bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-300">
+                                    <i class="fas fa-calendar-check text-lg lg:text-xl"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Present Today</p>
+                                    <h3 class="text-xl lg:text-2xl font-bold text-gray-800 dark:text-white">189</h3>
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <div class="flex items-center text-sm text-red-500 dark:text-red-400">
+                                    <i class="fas fa-arrow-down mr-1"></i>
+                                    <span>3% from last week</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 lg:p-6 border border-gray-200 dark:border-gray-700">
+                            <div class="flex items-center">
+                                <div class="p-3 rounded-full bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-300">
+                                    <i class="fas fa-building text-lg lg:text-xl"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Departments</p>
+                                    <h3 class="text-xl lg:text-2xl font-bold text-gray-800 dark:text-white">14</h3>
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <div class="flex items-center text-sm text-green-500 dark:text-green-400">
+                                    <i class="fas fa-arrow-up mr-1"></i>
+                                    <span>1 new department</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 lg:p-6 border border-gray-200 dark:border-gray-700">
+                            <div class="flex items-center">
+                                <div class="p-3 rounded-full bg-yellow-100 dark:bg-yellow-900/50 text-yellow-600 dark:text-yellow-300">
+                                    <i class="fas fa-exclamation-triangle text-lg lg:text-xl"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Pending Requests</p>
+                                    <h3 class="text-xl lg:text-2xl font-bold text-gray-800 dark:text-white">8</h3>
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <div class="flex items-center text-sm text-yellow-500 dark:text-yellow-400">
+                                    <i class="fas fa-circle mr-1"></i>
+                                    <span>Require attention</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Charts Row -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6 mb-6">
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 lg:p-6 lg:col-span-2 border border-gray-200 dark:border-gray-700">
+                            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
+                                <h2 class="text-lg font-semibold text-gray-800 dark:text-white">Employee Distribution</h2>
+                                <select class="text-sm border border-gray-300 dark:border-gray-600 rounded-md px-3 py-1 bg-white dark:bg-gray-700 text-gray-800 dark:text-white">
+                                    <option>This Year</option>
+                                    <option>Last Year</option>
+                                    <option>Last 6 Months</option>
+                                </select>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="employeeChart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 lg:p-6 border border-gray-200 dark:border-gray-700">
+                            <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Department Overview</h2>
+                            <div class="chart-container">
+                                <canvas id="departmentChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Recent Activity -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 lg:p-6 border border-gray-200 dark:border-gray-700">
+                        <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Recent Activity</h2>
+                        <div class="space-y-4">
+                            <div class="flex items-start space-x-3">
+                                <div class="w-8 h-8 bg-green-100 dark:bg-green-900/50 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-user-plus text-green-600 dark:text-green-300 text-sm"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-sm text-gray-800 dark:text-white">New employee <span class="font-medium">John Smith</span> joined the Engineering department</p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">2 hours ago</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start space-x-3">
+                                <div class="w-8 h-8 bg-blue-100 dark:bg-blue-900/50 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-edit text-blue-600 dark:text-blue-300 text-sm"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-sm text-gray-800 dark:text-white">Employee profile updated for <span class="font-medium">Sarah Johnson</span></p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">4 hours ago</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start space-x-3">
+                                <div class="w-8 h-8 bg-yellow-100 dark:bg-yellow-900/50 rounded-full flex items-center justify-center">
+                                    <i class="fas fa-clock text-yellow-600 dark:text-yellow-300 text-sm"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-sm text-gray-800 dark:text-white">Leave request submitted by <span class="font-medium">Mike Davis</span></p>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">6 hours ago</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Employees Section -->
+                <div id="employees-section" class="section hidden">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                        <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Employees</h2>
+                        <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                            <div class="relative">
+                                <input type="text" id="employeeSearch" placeholder="Search employees..." class="pl-10 pr-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent w-full sm:w-64">
+                                <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                            </div>
+                            <button id="addEmployeeBtn" class="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg transition-colors flex items-center justify-center">
+                                <i class="fas fa-plus mr-2"></i>Add Employee
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- View Toggle Button -->
+                    <div class="flex justify-center mb-6">
+                        <div class="bg-gray-100 dark:bg-gray-700 rounded-lg p-1 flex">
+                            <button id="cardViewBtn" class="px-4 py-2 rounded-md text-sm font-medium bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm">
+                                <i class="fas fa-th mr-2"></i>Card View
+                            </button>
+                            <button id="tableViewBtn" class="px-4 py-2 rounded-md text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
+                                <i class="fas fa-table mr-2"></i>Table View
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Employee Cards Grid -->
+                    <div id="employeeGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Employee cards will be dynamically generated here -->
+                    </div>
+
+                    <!-- Employee Table (Alternative View) -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 hidden" id="employeeTable">
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead>
+                                    <tr class="border-b border-gray-200 dark:border-gray-700">
+                                        <th class="text-left py-3 px-4 font-medium text-gray-500 dark:text-gray-400">Employee</th>
+                                        <th class="text-left py-3 px-4 font-medium text-gray-500 dark:text-gray-400">Department</th>
+                                        <th class="text-left py-3 px-4 font-medium text-gray-500 dark:text-gray-400">Position</th>
+                                        <th class="text-left py-3 px-4 font-medium text-gray-500 dark:text-gray-400">Status</th>
+                                        <th class="text-left py-3 px-4 font-medium text-gray-500 dark:text-gray-400">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="employeeTableBody">
+                                    <!-- Table rows will be dynamically generated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- No Employees Message -->
+                    <div id="noEmployeesMessage" class="text-center py-12 hidden">
+                        <div class="w-24 h-24 bg-gray-100 dark:bg-gray-700 rounded-full mx-auto mb-4 flex items-center justify-center">
+                            <i class="fas fa-users text-3xl text-gray-400"></i>
+                        </div>
+                        <h3 class="text-lg font-medium text-gray-800 dark:text-white mb-2">No employees found</h3>
+                        <p class="text-gray-500 dark:text-gray-400 mb-4">Get started by adding your first employee</p>
+                        <button class="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg transition-colors">
+                            <i class="fas fa-plus mr-2"></i>Add Employee
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Finances Section -->
+                <div id="finances-section" class="section hidden">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                        <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Financial Management</h2>
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <button id="addTransactionBtn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center">
+                                <i class="fas fa-plus mr-2"></i>Add Income
+                            </button>
+                            <button id="addExpenseBtn" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center">
+                                <i class="fas fa-minus mr-2"></i>Add Expense
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Financial Summary Cards -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+                            <div class="flex items-center">
+                                <div class="p-3 rounded-full bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-300">
+                                    <i class="fas fa-arrow-up text-xl"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Income</p>
+                                    <h3 id="totalIncome" class="text-2xl font-bold text-gray-800 dark:text-white">$0</h3>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+                            <div class="flex items-center">
+                                <div class="p-3 rounded-full bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-300">
+                                    <i class="fas fa-arrow-down text-xl"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Expenses</p>
+                                    <h3 id="totalExpenses" class="text-2xl font-bold text-gray-800 dark:text-white">$0</h3>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+                            <div class="flex items-center">
+                                <div class="p-3 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300">
+                                    <i class="fas fa-balance-scale text-xl"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Net Profit</p>
+                                    <h3 id="netProfit" class="text-2xl font-bold text-gray-800 dark:text-white">$0</h3>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+                            <div class="flex items-center">
+                                <div class="p-3 rounded-full bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-300">
+                                    <i class="fas fa-chart-pie text-xl"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Profit Margin</p>
+                                    <h3 id="profitMargin" class="text-2xl font-bold text-gray-800 dark:text-white">0%</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Financial Chart and Recent Transactions -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 lg:col-span-2 border border-gray-200 dark:border-gray-700">
+                            <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Financial Overview</h3>
+                            <div class="chart-container">
+                                <canvas id="financialChart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+                            <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">Recent Transactions</h3>
+                            <div id="recentTransactions" class="space-y-3">
+                                <!-- Recent transactions will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Transactions Table -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+                        <div class="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                            <h3 class="text-lg font-semibold text-gray-800 dark:text-white">All Transactions</h3>
+                            <div class="flex gap-2">
+                                <button id="exportFinancialPDF" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm">
+                                    <i class="fas fa-file-pdf mr-1"></i>PDF
+                                </button>
+                                <button id="exportFinancialExcel" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm">
+                                    <i class="fas fa-file-excel mr-1"></i>Excel
+                                </button>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead>
+                                    <tr class="border-b border-gray-200 dark:border-gray-700">
+                                        <th class="text-left py-3 px-4 font-medium text-gray-500 dark:text-gray-400">Date</th>
+                                        <th class="text-left py-3 px-4 font-medium text-gray-500 dark:text-gray-400">Description</th>
+                                        <th class="text-left py-3 px-4 font-medium text-gray-500 dark:text-gray-400">Category</th>
+                                        <th class="text-left py-3 px-4 font-medium text-gray-500 dark:text-gray-400">Amount</th>
+                                        <th class="text-left py-3 px-4 font-medium text-gray-500 dark:text-gray-400">Type</th>
+                                        <th class="text-left py-3 px-4 font-medium text-gray-500 dark:text-gray-400">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="transactionsTableBody">
+                                    <!-- Transaction rows will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Birthdays Section -->
+                <div id="birthdays-section" class="section hidden">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                        <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Employee Birthdays</h2>
+                        <button id="addBirthdayBtn" class="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg transition-colors flex items-center">
+                            <i class="fas fa-plus mr-2"></i>Add Birthday
+                        </button>
+                    </div>
+
+                    <!-- Today's Birthdays -->
+                    <div class="bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl shadow-sm p-6 mb-6 text-white">
+                        <h3 class="text-xl font-bold mb-4"><i class="fas fa-birthday-cake mr-2"></i>Today's Birthdays</h3>
+                        <div id="todaysBirthdays" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <!-- Today's birthdays will be populated here -->
+                        </div>
+                    </div>
+
+                    <!-- Upcoming Birthdays -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 mb-6">
+                        <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                            <h3 class="text-lg font-semibold text-gray-800 dark:text-white">Upcoming Birthdays (Next 30 Days)</h3>
+                        </div>
+                        <div id="upcomingBirthdays" class="p-6">
+                            <!-- Upcoming birthdays will be populated here -->
+                        </div>
+                    </div>
+
+                    <!-- Birthday Calendar -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+                        <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                            <h3 class="text-lg font-semibold text-gray-800 dark:text-white">Birthday Calendar</h3>
+                        </div>
+                        <div id="birthdayCalendar" class="p-6">
+                            <!-- Birthday calendar will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Meetings Section -->
+                <div id="meetings-section" class="section hidden">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                        <h2 class="text-2xl font-bold text-gray-800 dark:text-white">Meetings & Events</h2>
+                        <button id="addMeetingBtn" class="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg transition-colors flex items-center">
+                            <i class="fas fa-plus mr-2"></i>Schedule Meeting
+                        </button>
+                    </div>
+
+                    <!-- Today's Meetings -->
+                    <div class="bg-blue-50 dark:bg-blue-900/20 rounded-xl shadow-sm p-6 mb-6 border border-blue-200 dark:border-blue-800">
+                        <h3 class="text-xl font-bold text-blue-800 dark:text-blue-300 mb-4">
+                            <i class="fas fa-calendar-day mr-2"></i>Today's Schedule
+                        </h3>
+                        <div id="todaysMeetings" class="space-y-3">
+                            <!-- Today's meetings will be populated here -->
+                        </div>
+                    </div>
+
+                    <!-- Calendar View -->
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+                            <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                                <h3 class="text-lg font-semibold text-gray-800 dark:text-white">Meeting Calendar</h3>
+                            </div>
+                            <div id="meetingCalendar" class="p-6">
+                                <!-- Meeting calendar will be populated here -->
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+                            <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                                <h3 class="text-lg font-semibold text-gray-800 dark:text-white">Upcoming Meetings</h3>
+                            </div>
+                            <div id="upcomingMeetings" class="p-6 space-y-3">
+                                <!-- Upcoming meetings will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Files Section -->
+                <div id="files-section" class="section hidden">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                        <h2 class="text-2xl font-bold text-gray-800 dark:text-white">File Management</h2>
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <label for="fileUpload" class="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg transition-colors flex items-center cursor-pointer">
+                                <i class="fas fa-upload mr-2"></i>Upload Files
+                                <input type="file" id="fileUpload" multiple class="hidden" accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.jpg,.jpeg,.png">
+                            </label>
+                            <button id="ocrScanBtn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center">
+                                <i class="fas fa-scan mr-2"></i>OCR Scan
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- File Statistics -->
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+                            <div class="flex items-center">
+                                <div class="p-3 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300">
+                                    <i class="fas fa-file text-xl"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Files</p>
+                                    <h3 id="totalFiles" class="text-2xl font-bold text-gray-800 dark:text-white">0</h3>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+                            <div class="flex items-center">
+                                <div class="p-3 rounded-full bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-300">
+                                    <i class="fas fa-file-pdf text-xl"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">PDF Files</p>
+                                    <h3 id="pdfFiles" class="text-2xl font-bold text-gray-800 dark:text-white">0</h3>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+                            <div class="flex items-center">
+                                <div class="p-3 rounded-full bg-orange-100 dark:bg-orange-900/50 text-orange-600 dark:text-orange-300">
+                                    <i class="fas fa-file-excel text-xl"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Excel Files</p>
+                                    <h3 id="excelFiles" class="text-2xl font-bold text-gray-800 dark:text-white">0</h3>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+                            <div class="flex items-center">
+                                <div class="p-3 rounded-full bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-300">
+                                    <i class="fas fa-hdd text-xl"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Storage Used</p>
+                                    <h3 id="storageUsed" class="text-2xl font-bold text-gray-800 dark:text-white">0 MB</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- File Grid -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+                        <div class="p-6 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                            <h3 class="text-lg font-semibold text-gray-800 dark:text-white">Files</h3>
+                            <div class="flex gap-2">
+                                <button id="exportAllPDF" class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm">
+                                    <i class="fas fa-file-pdf mr-1"></i>Export PDF
+                                </button>
+                                <button id="exportAllExcel" class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm">
+                                    <i class="fas fa-file-excel mr-1"></i>Export Excel
+                                </button>
+                            </div>
+                        </div>
+                        <div id="fileGrid" class="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                            <!-- Files will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Departments Section -->
+                <div id="departments-section" class="section hidden">
+                    <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-6">Departments</h2>
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+                        <p class="text-gray-600 dark:text-gray-300">Department management content goes here...</p>
+                    </div>
+                </div>
+
+                <div id="attendance-section" class="section hidden">
+                    <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-6">Attendance</h2>
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+                        <p class="text-gray-600 dark:text-gray-300">Attendance tracking content goes here...</p>
+                    </div>
+                </div>
+
+                <div id="reports-section" class="section hidden">
+                    <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-6">Reports</h2>
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+                        <p class="text-gray-600 dark:text-gray-300">Reports content goes here...</p>
+                    </div>
+                </div>
+
+                <div id="settings-section" class="section hidden">
+                    <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-6">Settings</h2>
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+                        <p class="text-gray-600 dark:text-gray-300">Settings content goes here...</p>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Employee Modal -->
+    <div id="employeeModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 id="modalTitle" class="text-xl font-bold text-gray-800 dark:text-white">Add Employee</h3>
+                    <button id="closeModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <form id="employeeForm" class="space-y-4">
+                    <div>
+                        <label for="firstName" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">First Name</label>
+                        <input type="text" id="firstName" name="firstName" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                    
+                    <div>
+                        <label for="lastName" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Last Name</label>
+                        <input type="text" id="lastName" name="lastName" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                    
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
+                        <input type="email" id="email" name="email" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                    
+                    <div>
+                        <label for="phone" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Phone</label>
+                        <input type="tel" id="phone" name="phone" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                    
+                    <div>
+                        <label for="department" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Department</label>
+                        <select id="department" name="department" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <option value="">Select Department</option>
+                            <option value="Engineering">Engineering</option>
+                            <option value="Sales">Sales</option>
+                            <option value="Marketing">Marketing</option>
+                            <option value="HR">Human Resources</option>
+                            <option value="Finance">Finance</option>
+                            <option value="Operations">Operations</option>
+                            <option value="Design">Design</option>
+                            <option value="Product">Product</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label for="position" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Position</label>
+                        <input type="text" id="position" name="position" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                    
+                    <div>
+                        <label for="salary" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Salary</label>
+                        <input type="number" id="salary" name="salary" min="0" step="1000" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                    
+                    <div>
+                        <label for="startDate" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Start Date</label>
+                        <input type="date" id="startDate" name="startDate" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                    
+                    <div>
+                        <label for="status" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
+                        <select id="status" name="status" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                            <option value="On Leave">On Leave</option>
+                        </select>
+                    </div>
+                    
+                    <div class="flex gap-3 pt-4">
+                        <button type="submit" id="submitBtn" class="flex-1 bg-primary hover:bg-primary-dark text-white py-2 px-4 rounded-md transition-colors">
+                            <i class="fas fa-save mr-2"></i>Save Employee
+                        </button>
+                        <button type="button" id="cancelBtn" class="flex-1 bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-200 py-2 px-4 rounded-md transition-colors">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-sm w-full">
+            <div class="p-6">
+                <div class="flex items-center mb-4">
+                    <div class="w-12 h-12 bg-red-100 dark:bg-red-900/50 rounded-full flex items-center justify-center mr-4">
+                        <i class="fas fa-exclamation-triangle text-red-600 dark:text-red-400 text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-800 dark:text-white">Delete Employee</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">This action cannot be undone</p>
+                    </div>
+                </div>
+                
+                <p class="text-gray-600 dark:text-gray-300 mb-6">Are you sure you want to delete <span id="deleteEmployeeName" class="font-medium"></span>?</p>
+                
+                <div class="flex gap-3">
+                    <button id="confirmDelete" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-md transition-colors">
+                        Delete
+                    </button>
+                    <button id="cancelDelete" class="flex-1 bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-200 py-2 px-4 rounded-md transition-colors">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transaction Modal -->
+    <div id="transactionModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 id="transactionModalTitle" class="text-xl font-bold text-gray-800 dark:text-white">Add Transaction</h3>
+                    <button id="closeTransactionModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <form id="transactionForm" class="space-y-4">
+                    <div>
+                        <label for="transactionType" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Type</label>
+                        <select id="transactionType" name="transactionType" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <option value="income">Income</option>
+                            <option value="expense">Expense</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label for="transactionDescription" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+                        <input type="text" id="transactionDescription" name="description" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                    
+                    <div>
+                        <label for="transactionCategory" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
+                        <select id="transactionCategory" name="category" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <option value="">Select Category</option>
+                            <option value="salary">Salary</option>
+                            <option value="sales">Sales</option>
+                            <option value="services">Services</option>
+                            <option value="office">Office Expenses</option>
+                            <option value="travel">Travel</option>
+                            <option value="utilities">Utilities</option>
+                            <option value="marketing">Marketing</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label for="transactionAmount" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Amount ($)</label>
+                        <input type="number" id="transactionAmount" name="amount" min="0" step="0.01" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                    
+                    <div>
+                        <label for="transactionDate" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date</label>
+                        <input type="date" id="transactionDate" name="date" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                    
+                    <div class="flex gap-3 pt-4">
+                        <button type="submit" id="submitTransactionBtn" class="flex-1 bg-primary hover:bg-primary-dark text-white py-2 px-4 rounded-md transition-colors">
+                            <i class="fas fa-save mr-2"></i>Save Transaction
+                        </button>
+                        <button type="button" id="cancelTransactionBtn" class="flex-1 bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-200 py-2 px-4 rounded-md transition-colors">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Meeting Modal -->
+    <div id="meetingModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 id="meetingModalTitle" class="text-xl font-bold text-gray-800 dark:text-white">Schedule Meeting</h3>
+                    <button id="closeMeetingModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <form id="meetingForm" class="space-y-4">
+                    <div>
+                        <label for="meetingTitle" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Meeting Title</label>
+                        <input type="text" id="meetingTitle" name="title" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                    
+                    <div>
+                        <label for="meetingDescription" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+                        <textarea id="meetingDescription" name="description" rows="3" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"></textarea>
+                    </div>
+                    
+                    <div>
+                        <label for="meetingDate" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Date</label>
+                        <input type="date" id="meetingDate" name="date" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label for="meetingStartTime" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Start Time</label>
+                            <input type="time" id="meetingStartTime" name="startTime" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+                        <div>
+                            <label for="meetingEndTime" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">End Time</label>
+                            <input type="time" id="meetingEndTime" name="endTime" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label for="meetingLocation" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Location</label>
+                        <input type="text" id="meetingLocation" name="location" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                    
+                    <div>
+                        <label for="meetingAttendees" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Attendees (comma-separated)</label>
+                        <input type="text" id="meetingAttendees" name="attendees" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                    
+                    <div class="flex gap-3 pt-4">
+                        <button type="submit" id="submitMeetingBtn" class="flex-1 bg-primary hover:bg-primary-dark text-white py-2 px-4 rounded-md transition-colors">
+                            <i class="fas fa-save mr-2"></i>Schedule Meeting
+                        </button>
+                        <button type="button" id="cancelMeetingBtn" class="flex-1 bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-200 py-2 px-4 rounded-md transition-colors">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Birthday Modal -->
+    <div id="birthdayModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold text-gray-800 dark:text-white">Add Birthday</h3>
+                    <button id="closeBirthdayModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <form id="birthdayForm" class="space-y-4">
+                    <div>
+                        <label for="birthdayEmployee" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Employee</label>
+                        <select id="birthdayEmployee" name="employeeId" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <option value="">Select Employee</option>
+                            <!-- Employee options will be populated dynamically -->
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label for="birthdayDate" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Birthday</label>
+                        <input type="date" id="birthdayDate" name="birthday" required class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                    
+                    <div class="flex gap-3 pt-4">
+                        <button type="submit" class="flex-1 bg-primary hover:bg-primary-dark text-white py-2 px-4 rounded-md transition-colors">
+                            <i class="fas fa-save mr-2"></i>Save Birthday
+                        </button>
+                        <button type="button" id="cancelBirthdayBtn" class="flex-1 bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-200 py-2 px-4 rounded-md transition-colors">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- OCR Modal -->
+    <div id="ocrModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold text-gray-800 dark:text-white">OCR Text Recognition</h3>
+                    <button id="closeOcrModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label for="ocrImageUpload" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Upload Image for OCR</label>
+                        <input type="file" id="ocrImageUpload" accept="image/*" class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                    </div>
+                    
+                    <div id="ocrPreview" class="hidden">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Image Preview</label>
+                        <img id="ocrImage" class="max-w-full h-auto rounded-lg border">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Extracted Text</label>
+                        <textarea id="ocrResult" rows="8" readonly class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none resize-none" placeholder="Extracted text will appear here..."></textarea>
+                    </div>
+                    
+                    <div class="flex gap-3">
+                        <button id="processOcrBtn" class="flex-1 bg-primary hover:bg-primary-dark text-white py-2 px-4 rounded-md transition-colors">
+                            <i class="fas fa-cog mr-2"></i>Process OCR
+                        </button>
+                        <button id="saveOcrBtn" class="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-md transition-colors">
+                            <i class="fas fa-save mr-2"></i>Save as File
+                        </button>
+                        <button id="cancelOcrBtn" class="flex-1 bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-200 py-2 px-4 rounded-md transition-colors">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
